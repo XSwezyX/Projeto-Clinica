@@ -6,9 +6,9 @@ Sistema em Java (menu textual) com ABB por CPF, Fila de chegada e arquivos TXT.
 
 ## Integrantes
 
-- Integrante 1
-- Integrante 2
-- Integrante 3
+- Henrique Haramaki Mataveli - 10752924
+- Lukas Barone Sussa - 10753291
+- Ryan Silva de Sousa - 10757255
 
 ## Estrutura
 
