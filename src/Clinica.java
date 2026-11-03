@@ -137,15 +137,23 @@ public class Clinica {
 
     /** Opção 2: pede o CPF, busca na ABB e mostra os dados (ou avisa que não existe). */
     private void consultarPaciente() {
-        System.out.print("Digite o CPF: ");
+        boolean encontrado = false;
+        do{ 
+        System.out.print("Digite o CPF: (caso queira sair, digite 0)");
         String cpf = teclado.nextLine().trim();
+        if(cpf.equals("0")){
+            return; 
+        }
+
 
         Paciente p = arvore.buscar(cpf);
         if (p == null) {
             System.out.println("Cadastro não encontrado para o CPF " + cpf + ".");
         } else {
             System.out.println(p);
+            encontrado = true;
         }
+        }while(!encontrado);
     }
 
     private void registrarChegada() {
