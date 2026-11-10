@@ -27,6 +27,11 @@ public class Paciente {
     public String getUltimaConsulta() { return ultimaConsulta; }
     public int getQuantidadeConsultas() { return quantidadeConsultas; }
 
+
+    public void registrarConsulta(String data) {
+    ultimaConsulta = data;
+    quantidadeConsultas++;
+}
     @Override
     public String toString() {
         String ultima = ultimaConsulta.isEmpty() ? "nenhuma" : ultimaConsulta;
