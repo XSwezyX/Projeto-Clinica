@@ -190,6 +190,7 @@ public class Clinica {
     // OPÇÃO 2
 
     private void consultarPaciente() {
+<<<<<<< HEAD
 
         boolean encontrado = false;
 
@@ -231,8 +232,17 @@ public class Clinica {
         }
 
         System.out.print("Digite o CPF: ");
+=======
+    boolean encontrado = false;
+    do{
+        System.out.print("Digite o CPF (caso queira sair, digite 0):");
+>>>>>>> f8a2be581e69106fc920aba8114465364666c468
         String cpf = teclado.nextLine().trim();
+        if(cpf.equals("0")){
+            return;
+    }
 
+<<<<<<< HEAD
         if (fila.contem(cpf)) {
 
             System.out.println("Paciente já está na fila.");
@@ -279,6 +289,17 @@ public class Clinica {
         chegadasHoje++;
 
         System.out.println("Chegada registrada com sucesso!");
+=======
+
+    Paciente p = arvore.buscar(cpf);
+        if (p == null) {
+            System.out.println("Cadastro não encontrado para o CPF " + cpf + ".");
+        } else {
+            System.out.println(p);
+            encontrado = true;
+        }
+        }while(!encontrado);
+>>>>>>> f8a2be581e69106fc920aba8114465364666c468
     }
 
     // -------------------------------------------------
