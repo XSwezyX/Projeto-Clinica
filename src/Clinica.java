@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Clinica {
 
@@ -190,61 +192,54 @@ public class Clinica {
     // OPÇÃO 2
 
     private void consultarPaciente() {
-<<<<<<< HEAD
 
-        boolean encontrado = false;
+    boolean encontrado = false;
 
-        do {
+    do {
+        System.out.print("Digite o CPF: ");
+        String cpf = teclado.nextLine().trim();
 
-            System.out.print("Digite o CPF (0 para sair): ");
-            String cpf = teclado.nextLine().trim();
+        Paciente p = arvore.buscar(cpf);
 
-            if (cpf.equals("0")) {
-                return;
-            }
+        if (p == null) {
 
-            Paciente p = arvore.buscar(cpf);
+            System.out.println("Paciente não cadastrado.");
 
-            if (p == null) {
+            System.out.print("Deseja realizar o cadastro? (S/N): ");
+            String resposta = teclado.nextLine().trim();
 
-                System.out.println(
-                    "Cadastro não encontrado para o CPF " + cpf + "."
-                );
+            if (resposta.equalsIgnoreCase("S")) {
+
+                p = cadastrarPaciente(cpf);
+
+                if (p != null) {
+                    System.out.println(p);
+                    encontrado = true;
+                }
 
             } else {
-
-                System.out.println(p);
+                System.out.println("Cadastro não realizado.");
                 encontrado = true;
             }
 
-        } while (!encontrado);
-    }
+        } 
 
+    } while (!encontrado);
+}
     // -------------------------------------------------
     // OPÇÃO 3 - REGISTRAR CHEGADA
 
     private void registrarChegada() {
 
         if (chegadasHoje >= LIMITE_DIARIO) {
-
             System.out.println("Limite de 60 pacientes atingido.");
             return;
         }
 
         System.out.print("Digite o CPF: ");
-=======
-    boolean encontrado = false;
-    do{
-        System.out.print("Digite o CPF (caso queira sair, digite 0):");
->>>>>>> f8a2be581e69106fc920aba8114465364666c468
         String cpf = teclado.nextLine().trim();
-        if(cpf.equals("0")){
-            return;
-    }
 
-<<<<<<< HEAD
         if (fila.contem(cpf)) {
-
             System.out.println("Paciente já está na fila.");
             return;
         }
@@ -252,7 +247,6 @@ public class Clinica {
         Paciente paciente = arvore.buscar(cpf);
 
         if (paciente == null) {
-
             System.out.println("Paciente não cadastrado. Realize o cadastro.");
 
             System.out.print("Nome: ");
@@ -264,42 +258,20 @@ public class Clinica {
             System.out.print("Telefone: ");
             String telefone = teclado.nextLine();
 
-            paciente = new Paciente(
-                cpf,
-                nome,
-                nascimento,
-                telefone,
-                "",
-                0
-            );
+            paciente = new Paciente(cpf, nome, nascimento, telefone, "", 0);
 
-            boolean inserido = arvore.insere(paciente);
-
-            if (!inserido) {
-
+            if (!arvore.insere(paciente)) {
                 System.out.println("Não foi possível cadastrar o paciente.");
                 return;
             }
-
             System.out.println("Paciente cadastrado com sucesso!");
         }
 
+        System.out.println("Paciente: " + paciente.getNome());
         fila.enfileirar(cpf);
-
         chegadasHoje++;
-
         System.out.println("Chegada registrada com sucesso!");
-=======
-
-    Paciente p = arvore.buscar(cpf);
-        if (p == null) {
-            System.out.println("Cadastro não encontrado para o CPF " + cpf + ".");
-        } else {
-            System.out.println(p);
-            encontrado = true;
-        }
-        }while(!encontrado);
->>>>>>> f8a2be581e69106fc920aba8114465364666c468
+        System.out.println("Posição na fila: " + fila.tamanho());
     }
 
     // -------------------------------------------------
@@ -357,15 +329,13 @@ public class Clinica {
             return;
         }
 
-        System.out.print("Digite a data da consulta (DD/MM/AAAA): ");
-
-        String hoje = teclado.nextLine();
-
+        String hoje = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
         paciente.registrarConsulta(hoje);
 
         System.out.println("===== PACIENTE CHAMADO =====");
         System.out.println(paciente);
-        System.out.println("Atendimento iniciado!");
+        System.out.println("Data da consulta registrada: " + hoje);
+        System.out.println("Atendimento concluído!");
     }
 
     // -------------------------------------------------
@@ -418,7 +388,32 @@ public class Clinica {
 
     // -------------------------------------------------
     // AUXILIARES
+private Paciente cadastrarPaciente(String cpf) {
 
+    System.out.println("Paciente não cadastrado. Realize o cadastro.");
+
+    System.out.print("Nome: ");
+    String nome = teclado.nextLine();
+
+    System.out.print("Data de nascimento: ");
+    String nascimento = teclado.nextLine();
+
+    System.out.print("Telefone: ");
+    String telefone = teclado.nextLine();
+
+    Paciente paciente = new Paciente(
+        cpf, nome, nascimento, telefone, "", 0
+    );
+
+    if (!arvore.insere(paciente)) {
+        System.out.println("Não foi possível cadastrar o paciente.");
+        return null;
+    }
+
+    System.out.println("Paciente cadastrado com sucesso!");
+
+    return paciente;
+}
     private int lerInteiro(String mensagem) {
 
         System.out.print(mensagem);
