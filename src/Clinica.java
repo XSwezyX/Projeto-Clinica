@@ -193,39 +193,38 @@ public class Clinica {
 
     private void consultarPaciente() {
 
-    boolean encontrado = false;
+        boolean encontrado = false;
 
-    do {
-        System.out.print("Digite o CPF: ");
-        String cpf = teclado.nextLine().trim();
+        do {
+            System.out.print("Digite o CPF: ");
+            String cpf = teclado.nextLine().trim();
 
-        Paciente p = arvore.buscar(cpf);
+            Paciente paciente = arvore.buscar(cpf);
 
-        if (p == null) {
+            if (paciente != null) {
+                System.out.println(paciente);
+                encontrado = true;
+            } else {
+                System.out.println("Paciente não cadastrado.");
 
-            System.out.println("Paciente não cadastrado.");
+                System.out.print("Deseja realizar o cadastro? (S/N): ");
+                String resposta = teclado.nextLine().trim();
 
-            System.out.print("Deseja realizar o cadastro? (S/N): ");
-            String resposta = teclado.nextLine().trim();
+                if (resposta.equalsIgnoreCase("S")) {
+                    paciente = cadastrarPaciente(cpf);
 
-            if (resposta.equalsIgnoreCase("S")) {
-
-                p = cadastrarPaciente(cpf);
-
-                if (p != null) {
-                    System.out.println(p);
+                    if (paciente != null) {
+                        System.out.println(paciente);
+                        encontrado = true;
+                    }
+                } else {
+                    System.out.println("Cadastro não realizado.");
                     encontrado = true;
                 }
-
-            } else {
-                System.out.println("Cadastro não realizado.");
-                encontrado = true;
             }
 
-        } 
-
-    } while (!encontrado);
-}
+        } while (!encontrado);
+    }
     // -------------------------------------------------
     // OPÇÃO 3 - REGISTRAR CHEGADA
 
