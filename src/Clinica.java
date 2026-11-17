@@ -222,7 +222,6 @@ public class Clinica {
                     encontrado = true;
                 }
             }
-
         } while (!encontrado);
     }
     // -------------------------------------------------
@@ -338,21 +337,112 @@ public class Clinica {
     }
 
     // -------------------------------------------------
-    // OPÇÃO 6
+// OPÇÃO 6 - RELATÓRIO DE ATENDIMENTOS DO DIA
 
-    private void relatorioDoDia() {
+private void relatorioDoDia() {
 
-        System.out.println("[opção 6 ainda não implementada]");
-    }
+String hoje = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+int totalAtendidos = 0;
 
-    // -------------------------------------------------
-    // OPÇÃO 7
+System.out.println("===== RELATÓRIO DE ATENDIMENTOS DO DIA =====");
+System.out.println("Data: " + hoje);
 
-    private void listarAlfabetico() {
+totalAtendidos = exibirAtendidosDoDia(arvore.root(), hoje, 0);
 
-        System.out.println("[opção 7 ainda não implementada]");
-    }
+if (totalAtendidos == 0) {
+System.out.println("Nenhum atendimento realizado hoje.");
+}
 
+System.out.println("Total de pacientes atendidos: " + totalAtendidos);
+}
+
+private int exibirAtendidosDoDia(Node no, String hoje, int total) {
+
+if (no == null) {
+return total;
+}
+
+total = exibirAtendidosDoDia(no.getEsq(), hoje, total);
+
+Paciente paciente = no.getDado();
+
+if (hoje.equals(paciente.getUltimaConsulta())) {
+
+System.out.println("Nome: " + paciente.getNome());
+System.out.println("CPF: " + paciente.getCpf());
+System.out.println("Quantidade de consultas: "
++ paciente.getQuantidadeConsultas());
+System.out.println("------------------------------");
+
+total++;
+}
+
+total = exibirAtendidosDoDia(no.getDir(), hoje, total);
+
+return total;
+}
+
+// -------------------------------------------------
+// OPÇÃO 7 - LISTAR PACIENTES EM ORDEM ALFABÉTICA
+
+private void listarAlfabetico() {
+
+int quantidade = arvore.tamanho();
+
+if (quantidade == 0) {
+System.out.println("Não existem pacientes cadastrados.");
+return;
+}
+
+Paciente[] pacientes = new Paciente[quantidade];
+
+int posicao = copiarPacientes(arvore.root(), pacientes, 0);
+
+// Bubble Sort pelo nome.
+
+for (int i = 0; i < posicao - 1; i++) {
+
+for (int j = 0; j < posicao - 1 - i; j++) {
+
+if (pacientes[j].getNome().compareToIgnoreCase(
+pacientes[j + 1].getNome()) > 0) {
+
+Paciente auxiliar = pacientes[j];
+
+pacientes[j] = pacientes[j + 1];
+
+pacientes[j + 1] = auxiliar;
+}
+}
+}
+
+System.out.println("===== PACIENTES EM ORDEM ALFABÉTICA =====");
+
+for (int i = 0; i < posicao; i++) {
+
+System.out.println("Nome: " + pacientes[i].getNome());
+System.out.println("CPF: " + pacientes[i].getCpf());
+System.out.println("------------------------------");
+}
+
+System.out.println("Total de pacientes: " + posicao);
+}
+
+private int copiarPacientes(Node no, Paciente[] pacientes, int posicao) {
+
+if (no == null) {
+return posicao;
+}
+
+posicao = copiarPacientes(no.getEsq(), pacientes, posicao);
+
+pacientes[posicao] = no.getDado();
+posicao++;
+
+posicao = copiarPacientes(no.getDir(), pacientes, posicao);
+
+return posicao;
+}
     // -------------------------------------------------
     // OPÇÃO 8
 
