@@ -1,17 +1,22 @@
+
 /**
  * Fila encadeada de CPFs, implementada sem colecoes prontas.
- * Cada chegada guarda se tem direito a atendimento prioritario.
+ * Funcionalidade adicional: prioridade automatica nas chegadas.
+ * Os prioritarios sempre ficam antes dos comuns, respeitando a ordem de
+ * chegada dentro de cada grupo. A condicao so vale para esta chegada.
  */
 public class Fila {
 
     private class NoFila {
         String cpf;
+        String tipoPrioridade;
         boolean prioritario;
         NoFila proximo;
 
-        public NoFila(String cpf, boolean prioritario) {
+        public NoFila(String cpf, String tipoPrioridade) {
             this.cpf = cpf;
-            this.prioritario = prioritario;
+            this.tipoPrioridade = tipoPrioridade;
+            this.prioritario = !tipoPrioridade.equals("Nenhuma");
             this.proximo = null;
         }
     }
@@ -26,35 +31,23 @@ public class Fila {
         tamanho = 0;
     }
 
-    // Adiciona ao final: ordem normal de chegada (opcao 3).
-    public void enfileirar(String cpf, boolean prioritario) {
-        NoFila novo = new NoFila(cpf, prioritario);
+    // Uma so operacao de chegada, com prioridade automaticamente ativa.
+    public void enfileirar(String cpf, String tipoPrioridade) {
+        NoFila novo = new NoFila(cpf, tipoPrioridade);
 
         if (estaVazia()) {
             inicio = novo;
             fim = novo;
-        } else {
+        } else if (!novo.prioritario) {
+            // Pacientes comuns entram depois de todos os demais.
             fim.proximo = novo;
             fim = novo;
-        }
-        tamanho++;
-    }
-
-    // Adiciona os prioritarios antes dos comuns, sem alterar a ordem entre iguais.
-    public void enfileirarPrioritario(String cpf, boolean prioritario) {
-        if (!prioritario || estaVazia()) {
-            enfileirar(cpf, prioritario);
-            return;
-        }
-
-        NoFila novo = new NoFila(cpf, true);
-
-        if (!inicio.prioritario) {
-            // Primeiro paciente prioritario da fila.
+        } else if (!inicio.prioritario) {
+            // Primeiro paciente prioritario: entra antes dos comuns.
             novo.proximo = inicio;
             inicio = novo;
         } else {
-            // Procura a ultima posicao do grupo prioritario.
+            // Preserva a ordem de chegada dos pacientes prioritarios.
             NoFila atual = inicio;
             while (atual.proximo != null && atual.proximo.prioritario) {
                 atual = atual.proximo;
@@ -68,25 +61,10 @@ public class Fila {
         tamanho++;
     }
 
-    // Reorganiza os que ja estavam esperando, preservando a ordem de chegada
-    // dentro de cada grupo (prioritarios e nao prioritarios).
-    public void organizarPorPrioridade() {
-        Fila organizada = new Fila();
-        NoFila atual = inicio;
-        while (atual != null) {
-            organizada.enfileirarPrioritario(atual.cpf, atual.prioritario);
-            atual = atual.proximo;
-        }
-        inicio = organizada.inicio;
-        fim = organizada.fim;
-        tamanho = organizada.tamanho;
-    }
-
     public String desenfileirar() {
         if (estaVazia()) {
             return null;
         }
-
         String cpf = inicio.cpf;
         inicio = inicio.proximo;
         if (inicio == null) {
@@ -115,7 +93,7 @@ public class Fila {
         return false;
     }
 
-    // Posicoes internas iniciam em zero.
+    // Posicoes internas comecam em zero.
     private NoFila noNaPosicao(int posicao) {
         if (posicao < 0 || posicao >= tamanho) {
             return null;
@@ -135,6 +113,11 @@ public class Fila {
     public boolean ehPrioritario(int posicao) {
         NoFila no = noNaPosicao(posicao);
         return no != null && no.prioritario;
+    }
+
+    public String tipoPrioridade(int posicao) {
+        NoFila no = noNaPosicao(posicao);
+        return no == null ? "Nenhuma" : no.tipoPrioridade;
     }
 
     // Posicao exibida ao usuario comeca em 1.
