@@ -2,7 +2,7 @@
 
 Projeto 2 – Estrutura de Dados – Mackenzie (Sistemas de Informação) – Turma 3H – 2026/2.
 
-Aplicação Java em menu textual, com **Árvore Binária de Busca (ABB) por CPF**, **fila encadeada própria** e leitura/gravação de arquivos TXT. Não utiliza `Queue`, `LinkedList`, `TreeMap` nem `TreeSet`.
+Aplicação Java em menu textual, com **Árvore Binária de Busca (ABB) por CPF**, **fila encadeada própria** e leitura/gravação de arquivos TXT.
 
 ## Integrantes
 
