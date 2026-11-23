@@ -155,7 +155,8 @@ public class Clinica {
             int consultas = Integer.parseInt(campos[5].trim());
 
             if (!cpfValido(cpf) || nome.isEmpty() || telefone.isEmpty()
-                    || !nascimentoValido(nascimento) || consultas < 0) {
+                    || !nascimentoValido(nascimento) || consultas < 0
+                    || (!ultimaConsulta.isEmpty() && !nascimentoValido(ultimaConsulta))) {
                 return null;
             }
             return new Paciente(cpf, nome, nascimento, telefone,
@@ -401,11 +402,13 @@ public class Clinica {
         System.out.println("Finalidade: atender pacientes prioritários antes dos comuns,");
         System.out.println("mantendo a ordem de chegada dentro de cada grupo.");
         System.out.println("A funcionalidade funciona automaticamente desde o início.");
-        System.out.println("A prioridade de idoso com idade de 60 anos ou mais é reconhecida");
+        System.out.println("Na opção 3, a idade de 60 anos ou mais é reconhecida");
         System.out.println("automaticamente pela data de nascimento; também é possível");
         System.out.println("informar PCD, gestante, lactante, pessoa com criança de colo");
         System.out.println("ou mobilidade reduzida para a chegada atual.");
-        System.out.println("A prioridade ainda continua com ordem de chegada. Então se um idoso chegar primeiro que uma gestante, ainda será por ordem de chegada");
+        System.out.println("A opção 4 mostra a ordem real da fila e a opção 5 chama");
+        System.out.println("o próximo paciente, indicando seu tipo de prioridade.");
+        System.out.println("Nenhuma opção precisa ser ativada ou desativada.");
     }
 
     // OPCAO 10
@@ -415,7 +418,6 @@ public class Clinica {
             System.out.println(" - " + INTEGRANTES[i]);
         }
         System.out.println("Atenção: os cadastros alterados só são preservados em TXT");
-        System.out.println("se a opção 8 (Salvar cadastros) tiver sido utilizada.");
     }
 
     // AUXILIARES
@@ -495,7 +497,7 @@ public class Clinica {
         }
     }
 
-    // Calcula a idade sem LocalDate, considerando dia e mes de aniversario.
+    // Calcula a idade, considerando dia e mes de aniversario.
     private int calcularIdade(String nascimento) {
         if (!nascimentoValido(nascimento)) {
             return -1;
