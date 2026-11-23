@@ -29,9 +29,10 @@ public class Paciente {
 
 
     public void registrarConsulta(String data) {
-    ultimaConsulta = data;
-    quantidadeConsultas++;
-}
+        ultimaConsulta = data;
+        quantidadeConsultas++;
+    }
+
     @Override
     public String toString() {
         String ultima = ultimaConsulta.isEmpty() ? "nenhuma" : ultimaConsulta;
