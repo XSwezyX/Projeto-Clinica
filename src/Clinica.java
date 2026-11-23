@@ -417,7 +417,6 @@ public class Clinica {
         for (int i = 0; i < INTEGRANTES.length; i++) {
             System.out.println(" - " + INTEGRANTES[i]);
         }
-        System.out.println("Atenção: os cadastros alterados só são preservados em TXT");
     }
 
     // AUXILIARES
