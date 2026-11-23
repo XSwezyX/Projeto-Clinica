@@ -34,14 +34,6 @@ No Windows com PowerShell, os comandos também funcionam. É necessário ter o J
 9. Ativar fila prioritária (funcionalidade adicional do grupo).
 10. Exibir integrantes e sair.
 
-## Opção 8 – Salvar cadastros atualizados
-
-Grava todos os pacientes da ABB, em ordem de CPF, no arquivo **`dados/pacientes_atualizados.txt`**, preservando o formato exigido, sem campos extras:
-
-`CPF;nome;dataNascimento;telefone;ultimaConsulta;qtdeConsultas`
-
-A gravação **não sobrescreve** o arquivo de entrada `dados/pacientes.txt`. Para reutilizar os dados atualizados numa nova execução, substitua o conteúdo de `dados/pacientes.txt` pelo conteúdo de `dados/pacientes_atualizados.txt` antes de abrir o programa. Evite fazer isso antes de concluir a demonstração, caso queira manter os exemplos originais.
-
 ## Opção 9 – Funcionalidade adicional: fila prioritária
 
 **Finalidade:** reorganizar os pacientes que aguardam, colocando quem tem prioridade antes dos demais. A implementação usa a própria fila encadeada, sem coleções prontas e sem alterar a ABB.
