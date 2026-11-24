@@ -1,29 +1,11 @@
-
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 
-/**
- * Funcionalidade adicional: FILA PRIORITARIA AUTOMATICA.
- * A fila ja organiza os atendimentos por prioridade desde a primeira chegada.
- * Na opcao 3, o programa identifica idosos de 60 anos ou mais pela data de
- * nascimento e permite informar outras condicoes: PCD, gestante, lactante,
- * pessoa com crianca de colo ou mobilidade reduzida.
- * A cada tres prioritarios atendidos, chama um comum, se houver.
- * A opcao 9 consulta o contador e o proximo paciente, sem alterar a fila.
- * A opcao 4 mostra o resultado e a opcao 5 chama o proximo paciente.
- */
 public class Clinica {
 
     private static final String[] INTEGRANTES = {
@@ -95,11 +77,9 @@ public class Clinica {
         System.out.println("6. Relatório de atendimentos realizados no dia");
         System.out.println("7. Listar pacientes em ordem alfabética");
         System.out.println("8. Salvar cadastros atualizados em TXT");
-        System.out.println("9. Consultar controle da fila prioritária (funcionalidade adicional)");
+        System.out.println("9. Consultar regras da fila prioritária (funcionalidade adicional)");
         System.out.println("10. Sair");
     }
-
-    // OPCAO 1: carrega arquivo de seis campos na ABB por CPF.
     private void carregarPacientes() {
         if (carregado) {
             System.out.println("Os pacientes já foram carregados.");
@@ -110,9 +90,9 @@ public class Clinica {
         int ignorados = 0;
         int numeroLinha = 0;
 
-        try (BufferedReader leitor = new BufferedReader(
-                new InputStreamReader(new FileInputStream(ARQUIVO_ENTRADA),
-                                      StandardCharsets.UTF_8))) {
+        try {
+            FileReader arquivo = new FileReader(ARQUIVO_ENTRADA);
+            BufferedReader leitor = new BufferedReader(arquivo);
             String linha;
             while ((linha = leitor.readLine()) != null) {
                 numeroLinha++;
@@ -129,7 +109,9 @@ public class Clinica {
                     lidos++;
                 }
             }
+            leitor.close();
         } catch (IOException e) {
+            arvore = new ABB();
             System.out.println("Erro ao ler o arquivo " + ARQUIVO_ENTRADA
                 + ": " + e.getMessage());
             return;
@@ -166,8 +148,6 @@ public class Clinica {
             return null;
         }
     }
-
-    // OPCAO 2: consulta sem alterar a ABB.
     private void consultarPaciente() {
         String cpf = lerCpfValido("Digite o CPF: ");
         Paciente paciente = arvore.buscar(cpf);
@@ -177,9 +157,6 @@ public class Clinica {
             System.out.println(paciente);
         }
     }
-
-    // OPCAO 3: registra chegada. A prioridade fica vinculada a esta chegada,
-    // e nao ao cadastro permanente do paciente (arquivo de seis campos).
     private void registrarChegada() {
         if (chegadasHoje >= LIMITE_DIARIO) {
             System.out.println("Limite de 60 chegadas no dia atingido.");
@@ -217,8 +194,6 @@ public class Clinica {
             tipoPrioridade = condicao;
         }
         boolean prioritario = !tipoPrioridade.equals("Nenhuma");
-
-        // A prioridade fica sempre ativa e organiza a fila na propria chegada.
         fila.enfileirar(cpf, tipoPrioridade);
         chegadasHoje++;
 
@@ -248,8 +223,6 @@ public class Clinica {
             System.out.println("Categoria inválida. Digite de 0 a 5.");
         }
     }
-
-    // OPCAO 4: exibe a ordem real da fila.
     private void exibirFila() {
         if (fila.estaVazia()) {
             System.out.println("Não existem pacientes aguardando atendimento.");
@@ -275,14 +248,11 @@ public class Clinica {
         }
         System.out.println("Total de pacientes: " + fila.tamanho());
     }
-
-    // OPCAO 5: retira o proximo conforme a regra 3 para 1.
     private void chamarProximo() {
         if (fila.estaVazia()) {
             System.out.println("Não existem pacientes na fila.");
             return;
         }
-        // Guardar a condicao antes de remover o no da fila.
         int posicao = fila.ordemAtendimento()[0];
         String tipoPrioridade = fila.tipoPrioridade(posicao);
         String cpf = fila.desenfileirar();
@@ -291,7 +261,7 @@ public class Clinica {
             System.out.println("Paciente não encontrado na ABB.");
             return;
         }
-        String hoje = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+        String hoje = dataHoje();
         paciente.registrarConsulta(hoje);
         System.out.println("===== PACIENTE CHAMADO =====");
         System.out.println(paciente);
@@ -299,10 +269,8 @@ public class Clinica {
         System.out.println("Data da consulta registrada: " + hoje);
         System.out.println("Atendimento concluído!");
     }
-
-    // OPCAO 6: relatorio conforme o estado dos cadastros (nao e historico).
     private void relatorioDoDia() {
-        String hoje = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+        String hoje = dataHoje();
         System.out.println("===== RELATÓRIO DE ATENDIMENTOS DO DIA =====");
         System.out.println("Data: " + hoje);
         int total = exibirAtendidosDoDia(arvore.root(), hoje, 0);
@@ -328,8 +296,6 @@ public class Clinica {
         }
         return exibirAtendidosDoDia(no.getDir(), hoje, total);
     }
-
-    // OPCAO 7: vetor auxiliar e Bubble Sort, sem mudar a ABB.
     private void listarAlfabetico() {
         int quantidade = arvore.tamanho();
         if (quantidade == 0) {
@@ -367,26 +333,21 @@ public class Clinica {
         posicao++;
         return copiarPacientes(no.getDir(), pacientes, posicao);
     }
-
-    // OPCAO 8: percorre a ABB e grava exatamente os seis campos obrigatorios.
     private void salvarCadastros() {
-        File pasta = new File("dados");
-        if (!pasta.exists() && !pasta.mkdirs()) {
-            System.out.println("Não foi possível criar a pasta dados.");
-            return;
-        }
-        try (BufferedWriter escritor = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(ARQUIVO_SAIDA),
-                                       StandardCharsets.UTF_8))) {
+        try {
+            FileWriter escritor = new FileWriter(ARQUIVO_SAIDA);
             salvarEmOrdem(arvore.root(), escritor);
-            System.out.println("Cadastros salvos com sucesso em: " + ARQUIVO_SAIDA);
-            System.out.println("Total de pacientes salvos: " + arvore.tamanho());
+            escritor.flush();
+            escritor.close();
         } catch (IOException e) {
             System.out.println("Erro ao salvar os pacientes: " + e.getMessage());
+            return;
         }
+        System.out.println("Cadastros salvos com sucesso em: " + ARQUIVO_SAIDA);
+        System.out.println("Total de pacientes salvos: " + arvore.tamanho());
     }
 
-    private void salvarEmOrdem(Node no, BufferedWriter escritor)
+    private void salvarEmOrdem(Node no, FileWriter escritor)
             throws IOException {
         if (no == null) {
             return;
@@ -396,52 +357,52 @@ public class Clinica {
         escritor.write(p.getCpf() + ";" + p.getNome() + ";"
             + p.getDataNascimento() + ";" + p.getTelefone() + ";"
             + p.getUltimaConsulta() + ";" + p.getQuantidadeConsultas());
-        escritor.newLine();
+        escritor.write("\n");
         salvarEmOrdem(no.getDir(), escritor);
     }
+    private void funcionalidadeAdicional() {
+        System.out.println("===== FUNCIONALIDADE ADICIONAL DO GRUPO =====");
 
-    // OPCAO 9: consulta a situacao da prioridade automatica.
-   private void funcionalidadeAdicional() {
-    System.out.println("===== FUNCIONALIDADE ADICIONAL DO GRUPO =====");
+        System.out.println("\nNome: Fila prioritária automática 3 para 1.");
 
-    System.out.println("\nNome: Fila prioritária automática 3 para 1.");
+        System.out.println("\nObjetivo:");
+        System.out.println("Garantir atendimento preferencial aos pacientes prioritários,");
+        System.out.println("evitando que pacientes comuns aguardem indefinidamente.");
 
-    System.out.println("\nObjetivo:");
-    System.out.println("Garantir atendimento preferencial aos pacientes prioritários,");
-    System.out.println("sem prejudicar os pacientes comuns ou causar esperas indefinidas.");
+        System.out.println("\nQuem possui prioridade:");
+        System.out.println("- Idosos com 60 anos ou mais;");
+        System.out.println("- Pessoas com deficiência (PCD);");
+        System.out.println("- Gestantes;");
+        System.out.println("- Lactantes;");
+        System.out.println("- Pessoas com criança de colo;");
+        System.out.println("- Pessoas com mobilidade reduzida.");
 
-    System.out.println("\nQuem possui prioridade:");
-    System.out.println("- Idosos com 60 anos ou mais;");
-    System.out.println("- Pessoas com deficiência (PCD);");
-    System.out.println("- Gestantes;");
-    System.out.println("- Lactantes.");
+        System.out.println("\nRegras de funcionamento:");
+        System.out.println("1. A prioridade funciona automaticamente desde o início.");
+        System.out.println("2. Pacientes prioritários possuem preferência no atendimento.");
+        System.out.println("3. A cada 3 prioritários atendidos consecutivamente,");
+        System.out.println("   será chamado 1 paciente comum, caso exista na fila.");
+        System.out.println("4. Após atender um paciente comum, a contagem é reiniciada.");
+        System.out.println("5. Se não houver pacientes de uma categoria,");
+        System.out.println("   os pacientes da outra categoria serão atendidos normalmente.");
+        System.out.println("6. A ordem de chegada dentro de cada categoria é respeitada.");
+        System.out.println("7. Todas as condições prioritárias têm o mesmo nível de prioridade.");
 
-    System.out.println("\nRegras de funcionamento:");
-    System.out.println("1. A prioridade funciona automaticamente desde o início.");
-    System.out.println("2. Pacientes prioritários possuem preferência no atendimento.");
-    System.out.println("3. A cada 3 prioritários atendidos consecutivamente,");
-    System.out.println("   será chamado 1 paciente comum, caso exista na fila.");
-    System.out.println("4. Após atender um paciente comum, a contagem é reiniciada.");
-    System.out.println("5. Se não houver pacientes de uma categoria,");
-    System.out.println("   os pacientes da outra categoria serão atendidos normalmente.");
-    System.out.println("6. A ordem de chegada dentro de cada categoria é respeitada.");
+        System.out.println("\nComo utilizar:");
+        System.out.println("Na opção 3, o sistema identifica automaticamente os idosos");
+        System.out.println("pela data de nascimento. As demais condições de prioridade");
+        System.out.println("podem ser informadas durante o registro da chegada.");
 
-    System.out.println("\nComo utilizar:");
-    System.out.println("Na opção 3, o sistema identifica automaticamente os idosos");
-    System.out.println("pela data de nascimento. As demais condições de prioridade");
-    System.out.println("podem ser informadas durante o registro da chegada.");
+        System.out.println("\nExemplo de sequência de atendimento:");
+        System.out.println("Prioritário -> Prioritário -> Prioritário -> Comum");
 
-    System.out.println("\nExemplo de sequência de atendimento:");
-    System.out.println("Prioritário -> Prioritário -> Prioritário -> Comum");
+        System.out.println("\nEssa funcionalidade busca equilibrar a preferência");
+        System.out.println("dos pacientes prioritários com a organização da fila,");
+        System.out.println("evitando que pacientes comuns aguardem indefinidamente.");
 
-    System.out.println("\nEssa funcionalidade busca equilibrar a preferência");
-    System.out.println("dos pacientes prioritários com a organização da fila,");
-    System.out.println("evitando que pacientes comuns aguardem indefinidamente.");
+        System.out.println("=============================================");
+    }
 
-    System.out.println("=============================================");
-}
-
-    // OPCAO 10
     private void sair() {
         System.out.println("Os dados alterados somente serão preservados em arquivo "
             + "se a opção 8 tiver sido utilizada.");
@@ -450,16 +411,12 @@ public class Clinica {
             System.out.println(" - " + INTEGRANTES[i]);
         }
     }
-
-    // AUXILIARES
     private Paciente cadastrarPaciente(String cpf) {
         System.out.println("Paciente não cadastrado. Realize o cadastro.");
         if (!cpfValido(cpf)) {
             System.out.println("CPF inválido. Informe exatamente 11 dígitos.");
             return null;
         }
-        // Valida cada campo imediatamente: se houver erro, pede o mesmo campo
-        // novamente sem abandonar o cadastro nem voltar ao menu principal.
         String nome = lerCampoObrigatorio("Nome: ", "Nome");
         String nascimento = lerNascimentoValido();
         String telefone = lerCampoObrigatorio("Telefone: ", "Telefone");
@@ -472,8 +429,6 @@ public class Clinica {
         System.out.println("Paciente cadastrado com sucesso!");
         return paciente;
     }
-
-    // Repete a pergunta até o usuário fornecer um CPF no formato esperado.
     private String lerCpfValido(String mensagem) {
         while (true) {
             System.out.print(mensagem);
@@ -484,8 +439,6 @@ public class Clinica {
             System.out.println("CPF inválido. Informe exatamente 11 dígitos.");
         }
     }
-
-    // Não deixa nome ou telefone vazios, nem com o separador usado no TXT.
     private String lerCampoObrigatorio(String mensagem, String nomeCampo) {
         while (true) {
             System.out.print(mensagem);
@@ -497,8 +450,6 @@ public class Clinica {
                 + " inválido. Preencha o campo sem ponto e vírgula.");
         }
     }
-
-    // Uma data inválida não cancela o cadastro; solicita a data novamente.
     private String lerNascimentoValido() {
         while (true) {
             System.out.print("Data de nascimento (DD/MM/AAAA): ");
@@ -511,46 +462,88 @@ public class Clinica {
     }
 
     private boolean cpfValido(String cpf) {
-        return cpf.matches("[0-9]{11}");
+        if (cpf.length() != 11) {
+            return false;
+        }
+        for (int i = 0; i < cpf.length(); i++) {
+            if (cpf.charAt(i) < '0' || cpf.charAt(i) > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String dataHoje() {
+        return new SimpleDateFormat("dd/MM/yyyy").format(new Date());
     }
 
     private boolean nascimentoValido(String nascimento) {
-        if (!nascimento.matches("[0-9]{2}/[0-9]{2}/[0-9]{4}")) {
+        if (nascimento.length() != 10) {
             return false;
         }
-        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-        formato.setLenient(false);
-        try {
-            Date data = formato.parse(nascimento);
-            return !data.after(new Date());
-        } catch (ParseException e) {
+        for (int i = 0; i < nascimento.length(); i++) {
+            char c = nascimento.charAt(i);
+            if (i == 2 || i == 5) {
+                if (c != '/') {
+                    return false;
+                }
+            } else if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+
+        int dia = Integer.parseInt(nascimento.substring(0, 2));
+        int mes = Integer.parseInt(nascimento.substring(3, 5));
+        int ano = Integer.parseInt(nascimento.substring(6, 10));
+
+        if (ano < 1 || mes < 1 || mes > 12 || dia < 1) {
             return false;
         }
+
+        int[] diasMes = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        if (ano % 400 == 0 || (ano % 4 == 0 && ano % 100 != 0)) {
+            diasMes[1] = 29;
+        }
+        if (dia > diasMes[mes - 1]) {
+            return false;
+        }
+
+        String hoje = dataHoje();
+        int diaHoje = Integer.parseInt(hoje.substring(0, 2));
+        int mesHoje = Integer.parseInt(hoje.substring(3, 5));
+        int anoHoje = Integer.parseInt(hoje.substring(6, 10));
+
+        if (ano > anoHoje) {
+            return false;
+        }
+        if (ano == anoHoje && mes > mesHoje) {
+            return false;
+        }
+        if (ano == anoHoje && mes == mesHoje && dia > diaHoje) {
+            return false;
+        }
+        return true;
     }
 
-    // Calcula a idade, considerando dia e mes de aniversario.
     private int calcularIdade(String nascimento) {
         if (!nascimentoValido(nascimento)) {
             return -1;
         }
-        try {
-            SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-            formato.setLenient(false);
-            Calendar aniversario = Calendar.getInstance();
-            aniversario.setTime(formato.parse(nascimento));
-            Calendar hoje = Calendar.getInstance();
 
-            int idade = hoje.get(Calendar.YEAR) - aniversario.get(Calendar.YEAR);
-            if (hoje.get(Calendar.MONTH) < aniversario.get(Calendar.MONTH)
-                    || (hoje.get(Calendar.MONTH) == aniversario.get(Calendar.MONTH)
-                    && hoje.get(Calendar.DAY_OF_MONTH)
-                        < aniversario.get(Calendar.DAY_OF_MONTH))) {
-                idade--;
-            }
-            return idade;
-        } catch (ParseException e) {
-            return -1;
+        String hoje = dataHoje();
+        int diaNascimento = Integer.parseInt(nascimento.substring(0, 2));
+        int mesNascimento = Integer.parseInt(nascimento.substring(3, 5));
+        int anoNascimento = Integer.parseInt(nascimento.substring(6, 10));
+        int diaHoje = Integer.parseInt(hoje.substring(0, 2));
+        int mesHoje = Integer.parseInt(hoje.substring(3, 5));
+        int anoHoje = Integer.parseInt(hoje.substring(6, 10));
+
+        int idade = anoHoje - anoNascimento;
+        if (mesHoje < mesNascimento ||
+                (mesHoje == mesNascimento && diaHoje < diaNascimento)) {
+            idade--;
         }
+        return idade;
     }
 
     private int lerInteiro(String mensagem) {

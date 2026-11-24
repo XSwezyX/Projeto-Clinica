@@ -1,20 +1,6 @@
 
 public class Fila {
 
-    private class NoFila {
-        String cpf;
-        String tipoPrioridade;
-        boolean prioritario;
-        NoFila proximo;
-
-        public NoFila(String cpf, String tipoPrioridade) {
-            this.cpf = cpf;
-            this.tipoPrioridade = tipoPrioridade;
-            this.prioritario = !tipoPrioridade.equals("Nenhuma");
-            this.proximo = null;
-        }
-    }
-
     private NoFila inicio;
     private NoFila fim;
     private int tamanho;
