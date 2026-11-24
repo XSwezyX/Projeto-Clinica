@@ -18,6 +18,7 @@ public class Fila {
     private NoFila inicio;
     private NoFila fim;
     private int tamanho;
+    private int prioritariosConsecutivos = 0;
 
     public Fila() {
         inicio = null;
@@ -63,21 +64,72 @@ public class Fila {
         tamanho++;
     }
 
-    // Remove o primeiro paciente
+    // Calcula a ordem prevista: ate tres prioritarios e um comum.
+    public int[] ordemAtendimento() {
+        int[] ordem = new int[tamanho];
+        int totalPrioritarios = 0;
+        NoFila atual = inicio;
+
+        while (atual != null && atual.prioritario) {
+            totalPrioritarios++;
+            atual = atual.proximo;
+        }
+
+        int p = 0;
+        int c = totalPrioritarios;
+        int contador = prioritariosConsecutivos;
+
+        for (int i = 0; i < tamanho; i++) {
+            if (c < tamanho && (contador >= 3 || p >= totalPrioritarios)) {
+                ordem[i] = c++;
+                contador = 0;
+            } else {
+                ordem[i] = p++;
+                if (contador < 3) {
+                    contador++;
+                }
+            }
+        }
+        return ordem;
+    }
+
+    public int getPrioritariosConsecutivos() {
+        return prioritariosConsecutivos;
+    }
+
+    // Remove o proximo paciente conforme a regra 3 para 1.
     public String desenfileirar() {
         if (estaVazia()) {
             return null;
         }
 
-        String cpf = inicio.cpf;
-        inicio = inicio.proximo;
+        int posicao = ordemAtendimento()[0];
+        NoFila anterior = null;
+        NoFila atual = inicio;
 
-        if (inicio == null) {
-            fim = null;
+        for (int i = 0; i < posicao; i++) {
+            anterior = atual;
+            atual = atual.proximo;
         }
 
+        if (anterior == null) {
+            inicio = atual.proximo;
+        } else {
+            anterior.proximo = atual.proximo;
+        }
+        if (atual == fim) {
+            fim = anterior;
+        }
+
+        if (atual.prioritario) {
+            if (prioritariosConsecutivos < 3) {
+                prioritariosConsecutivos++;
+            }
+        } else {
+            prioritariosConsecutivos = 0;
+        }
         tamanho--;
-        return cpf;
+        return atual.cpf;
     }
 
     public boolean estaVazia() {
@@ -142,18 +194,12 @@ public class Fila {
     }
 
     public int posicaoDe(String cpf) {
-        NoFila atual = inicio;
-        int posicao = 1;
-
-        while (atual != null) {
-            if (atual.cpf.equals(cpf)) {
-                return posicao;
+        int[] ordem = ordemAtendimento();
+        for (int i = 0; i < ordem.length; i++) {
+            if (obter(ordem[i]).equals(cpf)) {
+                return i + 1;
             }
-
-            posicao++;
-            atual = atual.proximo;
         }
-
         return -1;
     }
 }

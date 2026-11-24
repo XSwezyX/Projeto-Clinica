@@ -20,7 +20,8 @@ import java.util.Scanner;
  * Na opcao 3, o programa identifica idosos de 60 anos ou mais pela data de
  * nascimento e permite informar outras condicoes: PCD, gestante, lactante,
  * pessoa com crianca de colo ou mobilidade reduzida.
- * A opcao 9 apenas explica como funciona, sem ativar nem desativar nada.
+ * A cada tres prioritarios atendidos, chama um comum, se houver.
+ * A opcao 9 consulta o contador e o proximo paciente, sem alterar a fila.
  * A opcao 4 mostra o resultado e a opcao 5 chama o proximo paciente.
  */
 public class Clinica {
@@ -94,7 +95,7 @@ public class Clinica {
         System.out.println("6. Relatório de atendimentos realizados no dia");
         System.out.println("7. Listar pacientes em ordem alfabética");
         System.out.println("8. Salvar cadastros atualizados em TXT");
-        System.out.println("9. Conhecer a fila prioritária (funcionalidade adicional)");
+        System.out.println("9. Consultar controle da fila prioritária (funcionalidade adicional)");
         System.out.println("10. Sair");
     }
 
@@ -225,7 +226,7 @@ public class Clinica {
         System.out.println("Classificação: "
             + (prioritario ? "PRIORITÁRIO" : "COMUM"));
         System.out.println("Tipo de prioridade: " + tipoPrioridade);
-        System.out.println("Posição na fila: " + fila.posicaoDe(cpf));
+        System.out.println("Posição prevista na fila: " + fila.posicaoDe(cpf));
     }
 
     private String lerCondicaoPrioritaria() {
@@ -256,8 +257,11 @@ public class Clinica {
         }
         System.out.println("===== FILA DE ESPERA =====");
         System.out.println("Modo: FILA PRIORITÁRIA AUTOMÁTICA");
-        for (int i = 0; i < fila.tamanho(); i++) {
-            String cpf = fila.obter(i);
+        System.out.println("Regra: 3 prioritários para 1 comum");
+        int[] ordem = fila.ordemAtendimento();
+        for (int i = 0; i < ordem.length; i++) {
+            int posicao = ordem[i];
+            String cpf = fila.obter(posicao);
             Paciente paciente = arvore.buscar(cpf);
             System.out.println("Posição: " + (i + 1));
             System.out.println("CPF: " + cpf);
@@ -265,21 +269,22 @@ public class Clinica {
                 System.out.println("Nome: " + paciente.getNome());
             }
             System.out.println("Classificação: "
-                + (fila.ehPrioritario(i) ? "PRIORITÁRIO" : "COMUM"));
-            System.out.println("Tipo de prioridade: " + fila.tipoPrioridade(i));
+                + (fila.ehPrioritario(posicao) ? "PRIORITÁRIO" : "COMUM"));
+            System.out.println("Tipo de prioridade: " + fila.tipoPrioridade(posicao));
             System.out.println("------------------------");
         }
         System.out.println("Total de pacientes: " + fila.tamanho());
     }
 
-    // OPCAO 5: retira o primeiro da fila e atualiza o cadastro na ABB.
+    // OPCAO 5: retira o proximo conforme a regra 3 para 1.
     private void chamarProximo() {
         if (fila.estaVazia()) {
             System.out.println("Não existem pacientes na fila.");
             return;
         }
         // Guardar a condicao antes de remover o no da fila.
-        String tipoPrioridade = fila.tipoPrioridade(0);
+        int posicao = fila.ordemAtendimento()[0];
+        String tipoPrioridade = fila.tipoPrioridade(posicao);
         String cpf = fila.desenfileirar();
         Paciente paciente = arvore.buscar(cpf);
         if (paciente == null) {
@@ -395,24 +400,51 @@ public class Clinica {
         salvarEmOrdem(no.getDir(), escritor);
     }
 
-    // OPCAO 9: somente informa, a funcionalidade JA esta ativa por padrao.
-    private void funcionalidadeAdicional() {
-        System.out.println("===== FUNCIONALIDADE ADICIONAL DO GRUPO =====");
-        System.out.println("Nome: Fila prioritária automática.");
-        System.out.println("Finalidade: atender pacientes prioritários antes dos comuns,");
-        System.out.println("mantendo a ordem de chegada dentro de cada grupo.");
-        System.out.println("A funcionalidade funciona automaticamente desde o início.");
-        System.out.println("Na opção 3, a idade de 60 anos ou mais é reconhecida");
-        System.out.println("automaticamente pela data de nascimento; também é possível");
-        System.out.println("informar PCD, gestante, lactante, pessoa com criança de colo");
-        System.out.println("ou mobilidade reduzida para a chegada atual.");
-        System.out.println("A opção 4 mostra a ordem real da fila e a opção 5 chama");
-        System.out.println("o próximo paciente, indicando seu tipo de prioridade.");
-        System.out.println("Nenhuma opção precisa ser ativada ou desativada.");
-    }
+    // OPCAO 9: consulta a situacao da prioridade automatica.
+   private void funcionalidadeAdicional() {
+    System.out.println("===== FUNCIONALIDADE ADICIONAL DO GRUPO =====");
+
+    System.out.println("\nNome: Fila prioritária automática 3 para 1.");
+
+    System.out.println("\nObjetivo:");
+    System.out.println("Garantir atendimento preferencial aos pacientes prioritários,");
+    System.out.println("sem prejudicar os pacientes comuns ou causar esperas indefinidas.");
+
+    System.out.println("\nQuem possui prioridade:");
+    System.out.println("- Idosos com 60 anos ou mais;");
+    System.out.println("- Pessoas com deficiência (PCD);");
+    System.out.println("- Gestantes;");
+    System.out.println("- Lactantes.");
+
+    System.out.println("\nRegras de funcionamento:");
+    System.out.println("1. A prioridade funciona automaticamente desde o início.");
+    System.out.println("2. Pacientes prioritários possuem preferência no atendimento.");
+    System.out.println("3. A cada 3 prioritários atendidos consecutivamente,");
+    System.out.println("   será chamado 1 paciente comum, caso exista na fila.");
+    System.out.println("4. Após atender um paciente comum, a contagem é reiniciada.");
+    System.out.println("5. Se não houver pacientes de uma categoria,");
+    System.out.println("   os pacientes da outra categoria serão atendidos normalmente.");
+    System.out.println("6. A ordem de chegada dentro de cada categoria é respeitada.");
+
+    System.out.println("\nComo utilizar:");
+    System.out.println("Na opção 3, o sistema identifica automaticamente os idosos");
+    System.out.println("pela data de nascimento. As demais condições de prioridade");
+    System.out.println("podem ser informadas durante o registro da chegada.");
+
+    System.out.println("\nExemplo de sequência de atendimento:");
+    System.out.println("Prioritário -> Prioritário -> Prioritário -> Comum");
+
+    System.out.println("\nEssa funcionalidade busca equilibrar a preferência");
+    System.out.println("dos pacientes prioritários com a organização da fila,");
+    System.out.println("evitando que pacientes comuns aguardem indefinidamente.");
+
+    System.out.println("=============================================");
+}
 
     // OPCAO 10
     private void sair() {
+        System.out.println("Os dados alterados somente serão preservados em arquivo "
+            + "se a opção 8 tiver sido utilizada.");
         System.out.println("Grupo:");
         for (int i = 0; i < INTEGRANTES.length; i++) {
             System.out.println(" - " + INTEGRANTES[i]);
