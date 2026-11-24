@@ -1,8 +1,19 @@
+
 # Sistema de Controle de Pacientes
 
-Projeto 2 – Estrutura de Dados – Mackenzie (Sistemas de Informação) – Turma 3H – 2026/2.
+Projeto 2 – Estrutura de Dados – Universidade Presbiteriana Mackenzie – Sistemas de Informação – Turma 3H – 2026/2.
 
-Aplicação Java em menu textual, com **Árvore Binária de Busca (ABB) por CPF**, **fila encadeada própria** e leitura/gravação de arquivos TXT.
+## Sobre o projeto
+
+Sistema desenvolvido em Java para gerenciar o cadastro de pacientes e organizar os atendimentos de uma clínica médica.
+
+O projeto utiliza:
+- Árvore Binária de Busca (ABB), organizada pelo CPF.
+- Fila encadeada implementada pelo grupo.
+- Leitura e gravação de arquivos TXT.
+- Bubble Sort para ordenação alfabética.
+- Interface com menu textual.
+- Controle de atendimento prioritário.
 
 ## Integrantes
 
@@ -12,48 +23,96 @@ Aplicação Java em menu textual, com **Árvore Binária de Busca (ABB) por CPF*
 
 ## Como compilar e executar
 
-Abra o terminal na **pasta `Projeto-Clinica-main`** (que contém `src` e `dados`) e execute:
+É necessário possuir o JDK instalado.
+
+Abra o terminal na pasta principal do projeto e execute:
 
 ```bash
 javac -encoding UTF-8 -d out src/*.java
 java -Dfile.encoding=UTF-8 -cp out Main
 ```
 
-No Windows com PowerShell, os comandos também funcionam. É necessário ter o JDK instalado.
+## Funcionalidades do sistema
 
-## Menu implementado
-
-1. Carregar pacientes do TXT (ABB por CPF, sem duplicatas).
+1. Carregar pacientes do TXT.
 2. Consultar paciente por CPF.
-3. Registrar chegada (cadastrar paciente novo, impedir repetição na fila e limitar a 60 chegadas).
+3. Registrar chegada para atendimento.
 4. Exibir fila de espera.
-5. Chamar o primeiro e atualizar última consulta/quantidade na ABB.
-6. Relatório dos pacientes com última consulta na data atual.
-7. Listar alfabeticamente usando vetor auxiliar e Bubble Sort.
-8. Salvar cadastros no TXT atualizado.
-9. Ativar fila prioritária (funcionalidade adicional do grupo).
+5. Chamar próximo paciente.
+6. Relatório de atendimentos realizados no dia.
+7. Listar pacientes em ordem alfabética.
+8. Salvar cadastros atualizados em TXT.
+9. Consultar funcionalidade adicional do grupo.
 10. Exibir integrantes e sair.
 
-## Opção 9 – Funcionalidade adicional: fila prioritária
+## Funcionalidade adicional — Fila prioritária automática 3 para 1
 
-**Finalidade:** reorganizar os pacientes que aguardam, colocando quem tem prioridade antes dos demais. A implementação usa a própria fila encadeada, sem coleções prontas e sem alterar a ABB.
+### Objetivo
 
-**Como usar:**
+Garantir atendimento preferencial aos pacientes prioritários, evitando que pacientes comuns aguardem indefinidamente devido à chegada constante de novos pacientes com prioridade.
 
-1. Use a opção **1** para carregar os pacientes e a opção **3** para registrar chegadas.
-2. Ao registrar cada chegada, o programa calcula automaticamente se o paciente possui **60 anos ou mais** pela data de nascimento, e pergunta se há outra condição de prioridade **nesta chegada**: PCD, gestante, lactante, pessoa com criança de colo ou mobilidade reduzida. É possível selecionar `0` se nenhuma dessas condições se aplica.
-3. Inicialmente, a opção **3** enfileira por chegada, conforme o enunciado. Selecione **9** para ativar o modo prioritário: os prioritários já aguardando são colocados antes dos demais.
-4. Após a ativação, as próximas chegadas são inseridas automaticamente na posição apropriada. A opção **4** exibe a sequência real e a opção **5** chama o primeiro dessa sequência.
+### Categorias prioritárias
 
-**Critério de desempate:** dentro de cada grupo (prioritário ou comum), prevalece a **ordem de chegada**. Não há distinção de nível entre as categorias prioritárias. A opção 9 permanece ativa até o programa encerrar.
+- Idosos com 60 anos ou mais.
+- Pessoas com deficiência (PCD).
+- Gestantes.
+- Lactantes.
+- Pessoas com criança de colo.
+- Pessoas com mobilidade reduzida.
 
-**Por que não existe campo `tipo` no TXT principal?** A idade é calculada com a data de nascimento já existente, sem guardar a informação “60+”. Outras condições são verificadas na recepção, pois podem se referir somente à visita atual. Essa condição fica no nó da fila (daquela chegada), não na ficha permanente, mantendo os **seis campos** obrigatórios no TXT. A aplicação demonstra uma regra simples de prioridade para o projeto acadêmico, não um protocolo de classificação de risco médico.
+A prioridade dos idosos é identificada automaticamente pelo sistema através da data de nascimento. As demais condições são informadas durante o registro da chegada.
 
-**Exemplo para demonstrar:** carregue pacientes, registre Ana (não prioritária), Daniel (idade >= 60), e Bruno (não prioritário). Antes de ativar, a ordem é Ana → Daniel → Bruno. Após selecionar **9**, passa a ser Daniel → Ana → Bruno. Outro paciente PCD que chegar depois, caso a fila prioritária já esteja ativada, entra depois de Daniel e antes de Ana.
+### Regras de funcionamento
 
-## Arquivos
+- A prioridade funciona automaticamente desde o início do programa.
+- Pacientes prioritários possuem preferência no atendimento.
+- A cada três pacientes prioritários atendidos consecutivamente, um paciente comum será chamado, caso exista na fila.
+- Após o atendimento de um paciente comum, o contador de prioridades é reiniciado.
+- Caso não existam pacientes comuns, os prioritários continuam sendo atendidos normalmente.
+- Caso não existam pacientes prioritários, os comuns são atendidos normalmente.
+- A ordem de chegada é respeitada dentro de cada categoria.
+- Todas as categorias prioritárias possuem o mesmo nível de prioridade.
 
-```text
+### Exemplo de atendimento
+
+| Atendimento | Classificação |
+|---|---|
+| 1º | Prioritário |
+| 2º | Prioritário |
+| 3º | Prioritário |
+| 4º | Comum |
+| 5º | Prioritário |
+| 6º | Prioritário |
+| 7º | Prioritário |
+| 8º | Comum |
+
+### Como utilizar
+
+1. Carregar os pacientes utilizando a opção 1.
+2. Registrar a chegada dos pacientes utilizando a opção 3.
+3. Informar a condição de prioridade, caso exista.
+4. Consultar a ordem prevista de atendimento na opção 4.
+5. Realizar os atendimentos utilizando a opção 5.
+6. Consultar a explicação da funcionalidade adicional na opção 9.
+
+A funcionalidade utiliza a própria fila encadeada implementada pelo grupo, sem utilizar coleções prontas do Java e sem modificar a organização da ABB.
+
+A condição de prioridade é armazenada apenas na fila, pois pode estar relacionada à visita atual do paciente. Dessa forma, o arquivo TXT mantém os seis campos exigidos no projeto.
+
+A proporção de três prioritários para um comum é uma regra proposta pelo grupo para fins acadêmicos, e não um protocolo de classificação de risco médico.
+
+## Regras do sistema
+
+- Limite de 60 chegadas durante a execução do sistema.
+- CPF único na ABB.
+- Não permite pacientes duplicados na fila.
+- Impede o carregamento duplicado do arquivo TXT.
+- As opções 2 a 9 somente são liberadas após o carregamento dos pacientes.
+- A data da última consulta e a quantidade de consultas são atualizadas após o atendimento.
+- Os cadastros alterados devem ser salvos pela opção 8.
+
+## Estrutura do projeto
+
 Projeto-Clinica-main/
 ├── src/
 │   ├── Main.java
@@ -63,8 +122,25 @@ Projeto-Clinica-main/
 │   ├── ABB.java
 │   └── Fila.java
 ├── dados/
-│   └── pacientes.txt
+│   ├── pacientes.txt
+│   └── pacientes_atualizados.txt
 └── README.md
-```
 
-Execute os comandos na pasta principal para o Java encontrar os caminhos relativos de `dados`.
+## Responsabilidade das classes
+
+| Classe | Responsabilidade |
+|---|---|
+| Main | Inicializar a aplicação. |
+| Clinica | Gerenciar o menu e as funcionalidades do sistema. |
+| Paciente | Armazenar os dados do paciente. |
+| Node | Representar um nó da ABB. |
+| ABB | Armazenar, organizar e consultar pacientes pelo CPF. |
+| Fila | Controlar a espera e a ordem de atendimento dos pacientes. |
+
+## Formato do arquivo TXT
+
+CPF;nome;dataNascimento;telefone;ultimaConsulta;qtdeConsultas
+
+O arquivo de entrada é pacientes.txt.
+
+Os cadastros atualizados são gravados em pacientes_atualizados.txt através da opção 8.
